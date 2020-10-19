@@ -1,48 +1,51 @@
-#include<stdio.h>
 #include <SFML/Graphics.hpp>
-#include<windows.h>
-#include<conio.h>
-void gotoxy(int x, int y)
-{
-	COORD c = { x, y };
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-}
-void draw_ship(int x, int y)
-{
-	gotoxy(x, y);
-	printf("*");
-}
-void erase_ship(int x, int y)
-{
-	gotoxy(x, y);
-	printf(" ");
-}
-void drawanderase(int x, int y)
-{
-	int jump = 1;
-	while (jump!=8)
-	{erase_ship(x, y); draw_ship(x, --y); Sleep(50); jump++;}
-	while (jump!=1)
-	{ erase_ship(x, y); draw_ship(x, ++y); Sleep(50); jump--;}
-}
-void move(int x, int y)
-{
-	char ch = ' ';
-	do {
-		if (_kbhit()) {
-			ch = _getch();
-
-			if (ch == 'a') { drawanderase(x, y); }
-			if (ch == ' ') { drawanderase(x, y); }
-			fflush(stdin);
-		}
-		Sleep(50);
-	} while (ch != 'x');
-}
+#include <iostream>
+#include <windows.h>
+#include "Animation.h"
+using namespace sf;
+using namespace std;
 int main()
 {
-	int x = 10, y = 15;
-	draw_ship(x, y);
-	move(x, y);
+	RenderWindow window(VideoMode(1024, 512), "SFML Tutorial", Style::Close /*| Style::Titlebar*/ | Style::Resize);
+
+	RectangleShape player(Vector2f(117.0f, 108.0f));
+
+
+	player.setPosition(Vector2f(100.0f, 230.0f));
+
+	Texture playerTexture; 
+	playerTexture.loadFromFile("player01Run.png"); 
+	player.setTexture(&playerTexture); 
+
+
+	Animation animation(&playerTexture, Vector2u(8, 1), 0.05f);
+
+	float deltaTime = 0.0f;
+	Clock clock;
+
+
+	while (window.isOpen())
+	{
+		deltaTime = clock.restart().asSeconds();
+
+		animation.Update(0, deltaTime);
+		player.setTextureRect(animation.uvRect);
+
+		window.clear();
+		window.draw(player);
+		window.display();
+
+		Event evnt;
+		while (window.pollEvent(evnt))
+		{
+			switch (evnt.type)
+			{
+			case Event::Closed:
+				window.close();
+				break;
+			}
+
+		}
+	}
 	return 0;
 }
